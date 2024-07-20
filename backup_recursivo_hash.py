@@ -1,7 +1,7 @@
 import os
 import shutil
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def get_last_backup_time(backup_dir):
     """Recuperar a hora do último backup de um arquivo."""
@@ -42,6 +42,8 @@ def backup_modified_files(source_dir, backup_dir):
 
     total_files = count_total_files(source_dir)
     processed_files = 0
+
+    start_time = datetime.now()
     
     for foldername, subfolders, filenames in os.walk(source_dir):
         rel_path = os.path.relpath(foldername, source_dir)
@@ -64,7 +66,7 @@ def backup_modified_files(source_dir, backup_dir):
                 # Comparar hashes e copiar se diferente
                 if source_hash != backup_hash:
                     shutil.copy2(source_file, backup_file)
-                    print(f'\rBackup atualizado para: {filename}\n')
+                    print(f'\rBackup atualizado para: {filename}')
 
                 # Atualizar o contador de arquivos processados e mostrar progresso
                 processed_files += 1
@@ -84,7 +86,15 @@ def backup_modified_files(source_dir, backup_dir):
         with open(error_file_path, 'w') as file:
             for error_file in error_files:
                 file.write(f'{error_file}\n')
-        print(f'Lista de arquivos com erros salva em {error_file_path}')
+        print(f'\nLista de arquivos com erros salva em {error_file_path}')
+
+    # Calcular e exibir a duração do backup
+    end_time = datetime.now()
+    duration = end_time - start_time
+    duration_in_s = duration.total_seconds()
+    hours, remainder = divmod(duration_in_s, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    print(f'\nBackup concluído em {int(hours)} horas, {int(minutes)} minutos e {int(seconds)} segundos.')
 
 # Solicitar ao usuário os diretórios de origem e destino
 source_directory = input("Digite o caminho completo do diretório de origem: ")
