@@ -11,7 +11,24 @@ from PIL import Image, ImageTk
 
 def janela():
 
-
+    def remove_readonly_recursively(directory):
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                file_path = os.path.join(root, file)
+                try:
+                    # Verifica os atributos do arquivo
+                    attributes = os.stat(file_path).st_mode
+                    
+                    # Remove o atributo de "somente leitura" se estiver ativo
+                    if not attributes & 0o200:  # Verifica se o bit de escrita está desativado
+                        os.chmod(file_path, attributes | 0o200)  # Ativa o bit de escrita
+                        print(f"Atributo 'somente leitura' removido: {file_path}")
+                    #else:
+                        #print(f"O arquivo já tem permissão de escrita: {file_path}")
+                except Exception as e:
+                    print(f"Erro ao processar o arquivo {file_path}: {e}")
+                    continue
+                    
     def get_last_backup_time(backup_dir):
         """Recuperar a hora do último backup de um arquivo."""
         last_backup_file = os.path.join(backup_dir, 'tempo_do_ultimo_backup.txt')
@@ -58,8 +75,7 @@ def janela():
         #print(backup_dir)
 
         def backup_modified_files():
-            #source_dir="C:\\Users\Gabriel\\OneDrive\\Adriana\\"
-            #backup_dir="C:\\Users\Gabriel\\Downloads\\teste\\"
+            remove_readonly_recursively (backup_dir)  #remover "somente leitura" no destino (bkp) 
 
             """Arquivos de backup modificados desde o último backup, preservando a estrutura de diretórios."""
             last_backup_time = get_last_backup_time(backup_dir)
@@ -67,9 +83,10 @@ def janela():
                 last_backup_time = datetime.min
 
             error_files = []
+            atualizados_files = []
 
-            total_files = count_total_files(source_dir)
-            processed_files = 0
+            #total_files = count_total_files(source_dir)
+            #processed_files = 0
 
             start_time = datetime.now()
             
@@ -94,19 +111,22 @@ def janela():
                         # Comparar hashes e copiar se diferente
                         if source_hash != backup_hash:
                             shutil.copy2(source_file, backup_file)
-                            #print(f'\rBackup atualizado para: {filename}')
+                            print(f'\rBackup atualizado para: {filename}')
+                            print(f'\r{backup_file} foi atualizado no backup...\n', end='')  
+                            atualizados_files.append(backup_file)   
 
                         # Atualizar o contador de arquivos processados e mostrar progresso
-                        processed_files += 1
-                        progress = (processed_files / total_files) * 100
+                        #processed_files += 1
+                        #progress = (processed_files / total_files) * 100
                         #print(f'\rProgresso: {progress:.2f}%', end='')
 
-                        status_label.config(text="Progresso: "+str(round(progress))+"%")
-                        root.update_idletasks()  # Atualiza a interface visualmente
+                        #status_label.config(text="Progresso: "+str(round(progress))+"%")
+                        #root.update_idletasks()  # Atualiza a interface visualmente
 
-                    except PermissionError:
-                        #print(f'Erro de permissão: não foi possível copiar {source_file}')
-                        error_files.append(source_file)
+                    except Exception as e:
+                        print(f'Erro do tipo: {e} em {source_file}')		
+                        error_files.append(source_file)				
+                        continue
 
             # Atualiza a data do último backup
             set_last_backup_time(backup_dir)
@@ -127,7 +147,15 @@ def janela():
             minutes, seconds = divmod(remainder, 60)
             #print(f'\nBackup concluído em {int(hours)} horas, {int(minutes)} minutos e {int(seconds)} segundos.')
 
-
+            # Abrir o arquivo em modo de escrita
+            with open(backup_dir+"/arquivos_erros.txt", 'w') as file:
+                for item in error_files:
+                    file.write(f"\n{item}\n")  # Grava cada item do array em uma nova linha
+        
+            # Abrir o arquivo em modo de escrita
+            with open(backup_dir+"/arquivos_atualizados.txt", 'w') as file:
+                for item in atualizados_files:
+                    file.write(f"\n{item}\n")  # Grava cada item do array em uma nova linha  
         backup_modified_files()
 
 
