@@ -75,7 +75,7 @@ def janela():
         #print(backup_dir)
 
         def backup_modified_files():
-            print("Iniciando o processamento. Aguarde!...") 
+            print("Iniciando o processamento. Aguarde!...")            
             remove_readonly_recursively (backup_dir)  #remover "somente leitura" no destino (bkp) 
 
             """Arquivos de backup modificados desde o último backup, preservando a estrutura de diretórios."""
@@ -100,7 +100,10 @@ def janela():
                 for filename in filenames:
                     source_file = os.path.join(foldername, filename)
                     backup_file = os.path.join(backup_subdir, filename)
+
                     print(f'\rVerificando caminho: {backup_file}. Aguarde...\n', end='')	
+
+
                     try:
                         # Calcular o hash dos arquivos de origem e destino
                         source_hash = calculate_hash(source_file)
@@ -146,7 +149,9 @@ def janela():
             duration_in_s = duration.total_seconds()
             hours, remainder = divmod(duration_in_s, 3600)
             minutes, seconds = divmod(remainder, 60)
-            #print(f'\nBackup concluído em {int(hours)} horas, {int(minutes)} minutos e {int(seconds)} segundos.')
+            print("\nArquivos com Erros: ".join(error_files))
+            print("\nArquivos atualizados no backup: ".join(atualizados_files))
+            print(f'\nBackup concluído em {int(hours)} horas, {int(minutes)} minutos e {int(seconds)} segundos.')  
 
             # Abrir o arquivo em modo de escrita
             with open(backup_dir+"/arquivos_erros.txt", 'w') as file:
