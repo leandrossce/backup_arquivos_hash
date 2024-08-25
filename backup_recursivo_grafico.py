@@ -75,6 +75,7 @@ def janela():
         #print(backup_dir)
 
         def backup_modified_files():
+            print("Iniciando o processamento. Aguarde!...") 
             remove_readonly_recursively (backup_dir)  #remover "somente leitura" no destino (bkp) 
 
             """Arquivos de backup modificados desde o último backup, preservando a estrutura de diretórios."""
@@ -99,7 +100,7 @@ def janela():
                 for filename in filenames:
                     source_file = os.path.join(foldername, filename)
                     backup_file = os.path.join(backup_subdir, filename)
-
+                    print(f'\rVerificando caminho: {backup_file}. Aguarde...\n', end='')	
                     try:
                         # Calcular o hash dos arquivos de origem e destino
                         source_hash = calculate_hash(source_file)
