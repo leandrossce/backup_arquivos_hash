@@ -11,6 +11,24 @@ from PIL import Image, ImageTk
 
 def janela():
 
+    def copy_with_progress(source_file, dest_file, buffer_size=1024*1024):
+        total_size = os.path.getsize(source_file)
+        copied_size = 0
+
+        with open(source_file, 'rb') as src, open(dest_file, 'wb') as dst:
+            while True:
+                buffer = src.read(buffer_size)
+                if not buffer:
+                    break
+                dst.write(buffer)
+                copied_size += len(buffer)
+                progress = copied_size / total_size * 100
+                print(f'\rCopiando para Backup: {progress:.2f}%', end='')
+                
+
+        # Copiar os metadados do arquivo, semelhante ao shutil.copy2
+        shutil.copystat(source_file, dest_file)
+
     def remove_readonly_recursively(directory):
         for root, dirs, files in os.walk(directory):
             for file in files:
@@ -101,7 +119,7 @@ def janela():
                     source_file = os.path.join(foldername, filename)
                     backup_file = os.path.join(backup_subdir, filename)
 
-                    print(f'\rVerificando caminho: {backup_file}. Aguarde...\n')	
+                    print(f'\rVerificando caminho: {backup_file}. Aguarde...\n', end='')	
 
 
                     try:
@@ -114,9 +132,11 @@ def janela():
 
                         # Comparar hashes e copiar se diferente
                         if source_hash != backup_hash:
-                            shutil.copy2(source_file, backup_file)
+                            copy_with_progress(source_file,backup_file)
+
+                            #shutil.copy2(source_file, backup_file)
                             print(f'\rBackup atualizado para: {filename}')
-                            print(f'\r{backup_file} foi atualizado no backup...\n')  
+                            print(f'\r{backup_file} foi atualizado no backup...\n', end='')  
                             atualizados_files.append(backup_file)   
 
                         # Atualizar o contador de arquivos processados e mostrar progresso
