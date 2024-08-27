@@ -101,7 +101,7 @@ def janela():
                     source_file = os.path.join(foldername, filename)
                     backup_file = os.path.join(backup_subdir, filename)
 
-                    print(f'\rVerificando caminho: {backup_file}. Aguarde...\n', end='')	
+                    print(f'\rVerificando caminho: {backup_file}. Aguarde...\n')	
 
 
                     try:
@@ -116,7 +116,7 @@ def janela():
                         if source_hash != backup_hash:
                             shutil.copy2(source_file, backup_file)
                             print(f'\rBackup atualizado para: {filename}')
-                            print(f'\r{backup_file} foi atualizado no backup...\n', end='')  
+                            print(f'\r{backup_file} foi atualizado no backup...\n')  
                             atualizados_files.append(backup_file)   
 
                         # Atualizar o contador de arquivos processados e mostrar progresso
